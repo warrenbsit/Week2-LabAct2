@@ -1,0 +1,109 @@
+<?php
+
+class Book {
+    public $title;
+    protected $author;
+    private $price;
+
+    // Constructor
+    public function __construct($title, $author, $price) {
+        $this->title = $title;
+        $this->author = $author;
+        $this->price = $price;
+    }
+
+    // Method to get book details
+    public function getDetails() {
+        return "Title: {$this->title}, Author: {$this->author}, Price: \${$this->price}";
+    }
+
+    // Method to set book price
+    public function setPrice($price) {
+        $this->price = $price;
+    }
+
+    // Magic __call method to handle non-existent methods
+    public function __call($name, $arguments) {
+        if ($name == 'updateStock') {
+            return "Stock updated for '{$this->title}' with arguments: " . implode(", ", $arguments);
+        }
+        return "Method {$name} does not exist.";
+    }
+}
+
+class Library {
+    private $books = [];
+    public $name;
+
+    // Constructor
+    public function __construct($name) {
+        $this->name = $name;
+    }
+
+    // Method to add a book
+    public function addBook(Book $book) {
+        $this->books[] = $book;
+    }
+
+    // Method to remove a book by title
+    public function removeBook($title) {
+        foreach ($this->books as $key => $book) {
+            if ($book->title == $title) {
+                unset($this->books[$key]);
+                echo "Book '{$title}' removed from the library.\n";
+                return;
+            }
+        }
+        echo "Book '{$title}' not found in the library.\n";
+    }
+
+    // Method to list all books
+    public function listBooks() {
+        if (empty($this->books)) {
+            echo "No books in the library.\n";
+            return;
+        }
+        echo "Books in the library:\n";
+        foreach ($this->books as $book) {
+            echo $book->getDetails() . "\n";
+        }
+    }
+
+    // Destructor
+    public function __destruct() {
+        echo "The library '{$this->name}' is now closed.\n";
+    }
+}
+
+// Implementation Tasks
+
+// Create instances of Book and Library
+$library = new Library("City Library");
+
+$book1 = new Book("The Great Gatsby", "F. Scott Fitzgerald", 10.99);
+$book2 = new Book("1984", "George Orwell", 8.99);
+
+// Add multiple books to the library
+$library->addBook($book1);
+$library->addBook($book2);
+
+// Update the price of a book
+$book1->setPrice(12.99);
+
+// Attempt to call a non-existent method on the Book object to trigger __call()
+echo $book1->updateStock(50) . "\n";
+
+// List all books in the library
+$library->listBooks();
+
+// Remove a book from the library
+$library->removeBook("1984");
+
+// List all books in the library after removal
+echo "Books in the library after removal:\n";
+$library->listBooks();
+
+// Destroy the Library object to trigger the destructor
+unset($library);
+
+?>
